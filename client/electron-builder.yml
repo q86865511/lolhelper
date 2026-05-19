@@ -1,0 +1,35 @@
+appId: app.lolhelper.client
+productName: LOL Helper
+copyright: Copyright © 2026
+files:
+  - dist/**/*
+  - resources/**/*
+  - package.json
+  - "!**/*.{md,map}"
+
+directories:
+  output: release
+  buildResources: resources
+
+# Auto-update via GitHub Releases
+publish:
+  provider: github
+  owner: YOUR_GH_USER
+  repo: lolhelper
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: LOL Helper

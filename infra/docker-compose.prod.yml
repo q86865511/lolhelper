@@ -1,0 +1,104 @@
+# Production compose for Oracle Cloud (or any single-VM deploy).
+# Differs from infra/docker-compose.yml (dev):
+#   - backend + worker are containerised
+#   - backend bound to 127.0.0.1 (Caddy proxies in)
+#   - Postgres/Redis NOT exposed to the public network
+#   - Restart policy = unless-stopped
+
+x-common-env: &common-env
+  POSTGRES_USER: ${POSTGRES_USER:-lolhelper}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DB: ${POSTGRES_DB:-lolhelper}
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_URL: redis://redis:6379/0
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-lolhelper}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-lolhelper}
+  APP_ENV: production
+  APP_CORS_ORIGINS: ${APP_CORS_ORIGINS}
+  RIOT_API_KEYS: ${RIOT_API_KEYS}
+  RIOT_SEED_REGIONS: ${RIOT_SEED_REGIONS}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+  GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+  JWT_SECRET: ${JWT_SECRET}
+  FRONTEND_URL: ${FRONTEND_URL}
+  REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  LOG_FORMAT: json
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lolhelper-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lolhelper}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-lolhelper}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lolhelper} -d ${POSTGRES_DB:-lolhelper}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: lolhelper-redis
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "1gb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    image: lolhelper-backend:latest
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: lolhelper-backend
+    restart: unless-stopped
+    environment: *common-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"   # only loopback — Caddy in front
+
+  worker:
+    image: lolhelper-backend:latest
+    container_name: lolhelper-worker
+    restart: unless-stopped
+    environment: *common-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["arq", "app.workers.settings.WorkerSettings"]
+
+volumes:
+  postgres-data:
+    name: lolhelper-postgres-data
+  redis-data:
+    name: lolhelper-redis-data

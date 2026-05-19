@@ -1,0 +1,90 @@
+[project]
+name = "lolhelper-backend"
+version = "0.1.0"
+description = "LOL Helper backend API and workers"
+requires-python = ">=3.12,<3.13"
+readme = "README.md"
+dependencies = [
+    # Web framework
+    "fastapi>=0.115.5",
+    "uvicorn[standard]>=0.32.1",
+    "pydantic>=2.10.2",
+    "pydantic-settings>=2.6.1",
+    # HTTP client
+    "httpx[http2]>=0.28.0",
+    "tenacity>=9.0.0",
+    # Database
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "greenlet>=3.1.1",  # required by SQLAlchemy async
+    # Redis / queue
+    "redis[hiredis]>=5.2.0",
+    "arq>=0.26.3",
+    # Auth
+    "authlib>=1.3.2",
+    "python-jose[cryptography]>=3.3.0",
+    "itsdangerous>=2.2.0",
+    # Misc
+    "structlog>=24.4.0",
+    "python-multipart>=0.0.18",
+    "orjson>=3.10.12",
+    "email-validator>=2.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "httpx>=0.28.0",
+    "ruff>=0.8.2",
+    "mypy>=1.13.0",
+    "types-redis>=4.6.0.20241004",
+    "factory-boy>=3.3.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["app"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "ASYNC", # flake8-async
+    "S",   # flake8-bandit (security)
+    "RUF", # ruff-specific
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "S101",  # use of assert (fine in tests)
+    "B008",  # function call in default arg (FastAPI Depends pattern)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B"]
+"alembic/**" = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+exclude = ["alembic/", "tests/"]
+
+[[tool.mypy.overrides]]
+module = ["authlib.*", "arq.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"

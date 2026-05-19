@@ -1,0 +1,100 @@
+# 本地開發用 docker-compose。生產用 docker-compose.prod.yml(含 Caddy reverse proxy)。
+
+x-common-env: &common-env
+  POSTGRES_USER: ${POSTGRES_USER:-lolhelper}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+  POSTGRES_DB: ${POSTGRES_DB:-lolhelper}
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_URL: redis://redis:6379/0
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-lolhelper}:${POSTGRES_PASSWORD:-changeme_in_production}@postgres:5432/${POSTGRES_DB:-lolhelper}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lolhelper-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lolhelper}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-lolhelper}
+      # tune for OLTP + analytic workload mix
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lolhelper} -d ${POSTGRES_DB:-lolhelper}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: lolhelper-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # backend + worker 本地開發時直接在主機跑 (uv run uvicorn ...);
+  # 此處保留 service 定義供生產或 CI 使用。要本地用 docker 跑 backend 時改用 docker-compose.prod.yml 或加 --profile docker。
+  backend:
+    profiles: ["docker"]
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: lolhelper-backend
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      APP_ENV: ${APP_ENV:-development}
+      RIOT_API_KEYS: ${RIOT_API_KEYS:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:8000/api/v1/auth/google/callback}
+      JWT_SECRET: ${JWT_SECRET:-}
+      APP_CORS_ORIGINS: ${APP_CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  worker:
+    profiles: ["docker"]
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: lolhelper-worker
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      APP_ENV: ${APP_ENV:-development}
+      RIOT_API_KEYS: ${RIOT_API_KEYS:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["arq", "app.workers.settings.WorkerSettings"]
+
+volumes:
+  postgres-data:
+    name: lolhelper-postgres-data
+  redis-data:
+    name: lolhelper-redis-data

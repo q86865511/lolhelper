@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "matchId": "KR_7234567890",
+    "participants": ["puuid-a", "puuid-b", "puuid-c", "puuid-d"]
+  },
+  "info": {
+    "gameCreation": 1747584000000,
+    "gameDuration": 950,
+    "gameMode": "CHERRY",
+    "gameVersion": "15.10.547.7926",
+    "platformId": "KR",
+    "queueId": 1700,
+    "participants": [
+      {
+        "puuid": "puuid-a",
+        "championId": 157,
+        "championName": "Yasuo",
+        "teamId": 100,
+        "playerSubteamId": 1,
+        "subteamPlacement": 1,
+        "win": true,
+        "kills": 7,
+        "deaths": 3,
+        "assists": 4,
+        "goldEarned": 12500,
+        "totalDamageDealtToChampions": 18000,
+        "totalDamageTaken": 14000,
+        "item0": 6671, "item1": 3072, "item2": 0,
+        "item3": 0, "item4": 0, "item5": 0, "item6": 3340,
+        "summoner1Id": 4, "summoner2Id": 32,
+        "playerAugment1": 1205, "playerAugment2": 7, "playerAugment3": 8, "playerAugment4": 9, "playerAugment5": 0, "playerAugment6": 0
+      },
+      {
+        "puuid": "puuid-b",
+        "championId": 99,
+        "championName": "Lux",
+        "teamId": 100,
+        "playerSubteamId": 1,
+        "subteamPlacement": 1,
+        "win": true,
+        "kills": 4,
+        "deaths": 2,
+        "assists": 11,
+        "goldEarned": 10500,
+        "totalDamageDealtToChampions": 22000,
+        "totalDamageTaken": 8000,
+        "item0": 6655, "item1": 3020, "item2": 0,
+        "item3": 0, "item4": 0, "item5": 0, "item6": 3340,
+        "summoner1Id": 4, "summoner2Id": 32,
+        "playerAugment1": 10, "playerAugment2": 7, "playerAugment3": 8, "playerAugment4": 0, "playerAugment5": 0, "playerAugment6": 0
+      },
+      {
+        "puuid": "puuid-c",
+        "championId": 64,
+        "championName": "LeeSin",
+        "teamId": 200,
+        "playerSubteamId": 2,
+        "subteamPlacement": 8,
+        "win": false,
+        "kills": 2,
+        "deaths": 6,
+        "assists": 1,
+        "goldEarned": 8000,
+        "totalDamageDealtToChampions": 9000,
+        "totalDamageTaken": 16000,
+        "item0": 6692, "item1": 0, "item2": 0,
+        "item3": 0, "item4": 0, "item5": 0, "item6": 3340,
+        "summoner1Id": 4, "summoner2Id": 32,
+        "playerAugment1": 1205, "playerAugment2": 0, "playerAugment3": 0, "playerAugment4": 0, "playerAugment5": 0, "playerAugment6": 0
+      },
+      {
+        "puuid": "puuid-d",
+        "championId": 22,
+        "championName": "Ashe",
+        "teamId": 200,
+        "playerSubteamId": 2,
+        "subteamPlacement": 8,
+        "win": false,
+        "kills": 3,
+        "deaths": 5,
+        "assists": 2,
+        "goldEarned": 8500,
+        "totalDamageDealtToChampions": 11000,
+        "totalDamageTaken": 12000,
+        "item0": 6672, "item1": 0, "item2": 0,
+        "item3": 0, "item4": 0, "item5": 0, "item6": 3340,
+        "summoner1Id": 4, "summoner2Id": 32,
+        "playerAugment1": 9, "playerAugment2": 0, "playerAugment3": 0, "playerAugment4": 0, "playerAugment5": 0, "playerAugment6": 0
+      }
+    ]
+  }
+}
