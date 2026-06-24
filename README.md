@@ -2,6 +2,7 @@
 
 > OP.GG 風的《英雄聯盟》統計工具,專注 **競技場 Arena** 與 **海克斯大亂鬥 Mayhem** —— 全端 async 資料管線 + 統計引擎 + Web/桌面雙客戶端。
 
+[![CI](https://github.com/q86865511/lolhelper/actions/workflows/ci.yml/badge.svg)](https://github.com/q86865511/lolhelper/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)
@@ -112,7 +113,7 @@ pnpm --filter @lolhelper/frontend test   # 前端 Playwright e2e
 
 ## 📄 授權與法律聲明
 
-MIT(LICENSE 待補)。
+本專案以 [MIT License](LICENSE) 釋出。
 
 This product isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc.
 
