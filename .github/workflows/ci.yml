@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: backend (ruff + pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安裝 uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: 安裝相依
+        run: uv sync
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: 測試
+        run: uv run pytest -q
+      - name: Mypy（advisory，暫不阻擋）
+        run: uv run mypy app
+        continue-on-error: true
+
+  node:
+    name: frontend + client (typecheck + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 啟用 corepack（pnpm）
+        run: corepack enable
+      - name: 安裝相依
+        run: pnpm install --frozen-lockfile
+      - name: Frontend typecheck
+        run: pnpm --filter @lolhelper/frontend typecheck
+      - name: Frontend build
+        run: pnpm --filter @lolhelper/frontend build
+      - name: Client typecheck
+        run: pnpm --filter @lolhelper/client typecheck
+      - name: Client build（electron-vite bundle）
+        run: pnpm --filter @lolhelper/client build
