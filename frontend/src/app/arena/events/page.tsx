@@ -82,7 +82,6 @@ export default async function ArenaEvents() {
           <AugmentTable
             rows={stats.augments}
             meta={meta}
-            showRarity={false}
             emptyMessage="尚無達標的事件選擇樣本。"
           />
         </div>

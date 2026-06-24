@@ -83,7 +83,6 @@ export default async function ArenaHex() {
           <AugmentTable
             rows={stats.augments}
             meta={meta}
-            showRarity
             emptyMessage="還沒有達到 30 場樣本的海克斯 augment。再多跑幾輪 crawl 累積。"
           />
         </div>

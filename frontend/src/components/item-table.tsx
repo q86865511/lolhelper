@@ -22,6 +22,7 @@ type ItemMeta = {
   description: string | null;
   gold: number | null;
   icon_path: string | null;
+  tags: string[] | null;
 };
 
 type SortKey = "win_rate" | "pick_rate" | "games" | "gold";
