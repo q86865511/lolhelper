@@ -16,10 +16,10 @@ Flow:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Cookie, HTTPException, Request, Response, status
+from fastapi import APIRouter, Cookie, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 
@@ -144,7 +144,7 @@ async def google_callback(
 
     # Find or create user
     user = (await db.execute(select(User).where(User.google_sub == sub))).scalar_one_or_none()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if user is None:
         user = User(
             google_sub=sub,
@@ -202,7 +202,7 @@ async def refresh_session(
     ).scalar_one_or_none()
     if row is None or row.revoked_at is not None:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
-    if row.expires_at < datetime.now(timezone.utc):
+    if row.expires_at < datetime.now(UTC):
         raise HTTPException(status_code=401, detail="Refresh token expired")
 
     access_token, expires = create_access_token(row.user_id, settings)
@@ -232,7 +232,7 @@ async def logout(
             )
         ).scalar_one_or_none()
         if row is not None and row.revoked_at is None:
-            row.revoked_at = datetime.now(timezone.utc)
+            row.revoked_at = datetime.now(UTC)
             await db.commit()
     _clear_session_cookies(response)
     return {"status": "logged_out"}
@@ -279,13 +279,13 @@ async def delete_account(
     user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
-    user.deleted_at = datetime.now(timezone.utc)
+    user.deleted_at = datetime.now(UTC)
     # Revoke all refresh tokens
     from sqlalchemy import update
     await db.execute(
         update(RefreshToken)
         .where(RefreshToken.user_id == user_id, RefreshToken.revoked_at.is_(None))
-        .values(revoked_at=datetime.now(timezone.utc))
+        .values(revoked_at=datetime.now(UTC))
     )
     await db.commit()
     _clear_session_cookies(response)

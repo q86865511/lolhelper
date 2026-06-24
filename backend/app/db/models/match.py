@@ -17,7 +17,6 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     DateTime,
-    ForeignKey,
     Index,
     Integer,
     SmallInteger,

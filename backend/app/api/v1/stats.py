@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import and_, select, text
+from sqlalchemy import select, text
 
 from app.deps import DbDep
 from app.services.stats_engine import assign_tiers, wilson_lower_bound

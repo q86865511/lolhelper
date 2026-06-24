@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { cookies } from "next/headers";
 import { fetchCurrentUser } from "@/lib/auth";
 import { NavUserMenu } from "@/components/nav-user-menu";
@@ -28,7 +29,7 @@ export async function Nav() {
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href as Route}
                 className="rounded px-3 py-1.5 text-sm text-text-muted transition hover:bg-surface hover:text-text"
               >
                 {item.label}

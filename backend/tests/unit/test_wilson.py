@@ -9,7 +9,6 @@ from __future__ import annotations
 import math
 
 import pytest
-
 from app.services.stats_engine import (
     assign_tiers,
     wilson_lower_bound,

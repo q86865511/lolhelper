@@ -53,7 +53,7 @@ async def main() -> None:
         try:
             count = await seed_platform(platform, include_master=include_master)
             totals[platform] = count
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             log.warning("seed_initial.platform_failed", platform=platform, error=str(e))
             totals[platform] = 0
 

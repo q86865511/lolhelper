@@ -7,7 +7,7 @@ ingest API can all share it.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 # Arena queue IDs (gameMode=CHERRY)
@@ -61,7 +61,7 @@ def parse_match(payload: dict[str, Any], source: str) -> tuple[dict[str, Any], l
         raise ValueError("payload missing metadata.matchId")
 
     game_creation_ms = int(info.get("gameCreation", 0))
-    game_creation = datetime.fromtimestamp(game_creation_ms / 1000.0, tz=timezone.utc)
+    game_creation = datetime.fromtimestamp(game_creation_ms / 1000.0, tz=UTC)
     game_version = info.get("gameVersion")
     patch = patch_from_game_version(game_version)
     platform = info.get("platformId") or platform_from_match_id(match_id)
@@ -77,7 +77,7 @@ def parse_match(payload: dict[str, Any], source: str) -> tuple[dict[str, Any], l
         "game_creation": game_creation,
         "game_duration": int(info.get("gameDuration", 0)) or None,
         "source": source,
-        "ingested_at": datetime.now(timezone.utc),
+        "ingested_at": datetime.now(UTC),
         # We DON'T persist raw_blob by default to keep DB lean; opt-in via worker setting
         "raw_blob": None,
     }

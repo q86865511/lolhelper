@@ -27,7 +27,7 @@ async def startup(ctx: dict) -> None:
     ctx["settings"] = settings
 
 
-async def shutdown(ctx: dict) -> None:  # noqa: ARG001
+async def shutdown(ctx: dict) -> None:
     log.info("worker.shutdown")
     from app.db.session import dispose_engine
     from app.services.riot.client import close_riot_client

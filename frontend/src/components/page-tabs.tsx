@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 
 export type TabItem = { href: string; label: string; active?: boolean };
 
@@ -9,7 +10,7 @@ export function PageTabs({ items }: { items: TabItem[] }) {
         {items.map((item) => (
           <Link
             key={item.href}
-            href={item.href}
+            href={item.href as Route}
             className={`relative px-4 py-2.5 text-sm transition ${
               item.active
                 ? "text-text"

@@ -11,28 +11,29 @@ Create Date: 2026-05-18
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Sequence, Union
+from datetime import datetime, timezone, UTC
+from typing import Union
+from collections.abc import Sequence
 
 from alembic import op
 
 revision: str = "0002_extend_partitions"
-down_revision: Union[str, None] = "0001_initial"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "0001_initial"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def _month_bounds(year: int, month: int) -> tuple[str, str]:
-    start = datetime(year, month, 1, tzinfo=timezone.utc).isoformat()
+    start = datetime(year, month, 1, tzinfo=UTC).isoformat()
     if month == 12:
-        end = datetime(year + 1, 1, 1, tzinfo=timezone.utc).isoformat()
+        end = datetime(year + 1, 1, 1, tzinfo=UTC).isoformat()
     else:
-        end = datetime(year, month + 1, 1, tzinfo=timezone.utc).isoformat()
+        end = datetime(year, month + 1, 1, tzinfo=UTC).isoformat()
     return start, end
 
 
 def _create_partitions(parent: str, months_back: int, months_ahead: int) -> None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     year, month = now.year, now.month
     for offset in range(-months_back, months_ahead + 1):
         m = month + offset

@@ -12,9 +12,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-from datetime import datetime, timezone
-
-from sqlalchemy import and_, or_, select
+from datetime import UTC, datetime
 
 from app.core.logging import configure_logging, get_logger
 from app.db.models import CrawlState, Match
@@ -28,12 +26,13 @@ from app.workers.fetch_match import (
     _insert_match,
     _mark_crawled,
 )
+from sqlalchemy import or_, select
 
 
 async def crawl_once(batch: int, max_fetch: int) -> dict[str, int]:
     log = get_logger("crawl_once")
     client = get_riot_client()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Pick puuids (most stale, highest priority)
     async with session_scope() as db:
@@ -106,7 +105,7 @@ async def crawl_once(batch: int, max_fetch: int) -> dict[str, int]:
 
             try:
                 match_row, parts = parse_match(payload, source="riot_api")
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 log.warning("crawl_once.parse_error", match_id=mid, error=str(e))
                 continue
 

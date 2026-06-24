@@ -9,7 +9,7 @@ of names lands in the `name` column of each metadata table.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -80,7 +80,7 @@ async def refresh_augments() -> int:
         if isinstance(rid, int):
             rich_by_id[rid] = r
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     rows: list[dict[str, Any]] = []
     seen: set[int] = set()
     sources: list[dict[str, Any]] = list(primary_lean) + [
@@ -136,7 +136,7 @@ async def refresh_champions() -> int:
     fallback = await community_dragon.fetch_champion_summary(FALLBACK_LOCALE)
 
     fallback_by_id = {c["id"]: c for c in fallback if isinstance(c.get("id"), int)}
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     rows = []
     seen: set[int] = set()
     sources = list(primary) + [c for c in fallback if c.get("id") not in {p.get("id") for p in primary}]
@@ -185,7 +185,7 @@ async def refresh_items() -> int:
     fallback = await community_dragon.fetch_items(FALLBACK_LOCALE)
 
     fallback_by_id = {it["id"]: it for it in fallback if isinstance(it.get("id"), int)}
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     rows = []
     seen: set[int] = set()
     sources = list(primary) + [it for it in fallback if it.get("id") not in {p.get("id") for p in primary}]
@@ -228,7 +228,7 @@ async def refresh_items() -> int:
     return len(rows)
 
 
-async def refresh_meta_all(ctx: dict | None = None) -> dict[str, int]:  # noqa: ARG001
+async def refresh_meta_all(ctx: dict | None = None) -> dict[str, int]:
     return {
         "augments": await refresh_augments(),
         "champions": await refresh_champions(),

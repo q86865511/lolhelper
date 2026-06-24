@@ -9,7 +9,7 @@ Two ARQ tasks:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select
@@ -18,9 +18,9 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.core.logging import get_logger
 from app.db.models import CrawlState, Match
 from app.db.session import session_scope
-from app.services.riot.client import get_riot_client, platform_to_cluster
+from app.services.riot.client import get_riot_client
 from app.services.riot.exceptions import RiotError, RiotForbidden, RiotNotFound
-from app.utils.match import ARENA_QUEUE_IDS, is_arena, parse_match
+from app.utils.match import is_arena, parse_match
 
 log = get_logger(__name__)
 
@@ -36,7 +36,7 @@ MAX_MATCH_AGE_DAYS = 180
 
 
 def _crawl_start_time_seconds() -> int:
-    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_MATCH_AGE_DAYS)
+    cutoff = datetime.now(UTC) - timedelta(days=MAX_MATCH_AGE_DAYS)
     return int(cutoff.timestamp())
 
 
@@ -52,7 +52,7 @@ async def crawl_puuid_matches(
     queue: int = 1700,
 ) -> dict[str, int]:
     client = get_riot_client()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     try:
         match_ids = await client.get_match_ids_by_puuid(
@@ -138,7 +138,7 @@ async def fetch_match(match_id: str, cluster: str, *, discovered_by: str | None 
 
     try:
         match_row, participants = parse_match(payload, source="riot_api")
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         log.warning("fetch_match.parse_failed", match_id=match_id, error=str(e))
         return {"status": "parse_error"}
 
@@ -212,6 +212,6 @@ async def crawl_puuid_matches_task(ctx: dict, puuid: str, cluster: str) -> dict[
 
 
 async def fetch_match_task(
-    ctx: dict, match_id: str, cluster: str, discovered_by: str | None = None  # noqa: ARG001
+    ctx: dict, match_id: str, cluster: str, discovered_by: str | None = None
 ) -> dict[str, Any]:
     return await fetch_match(match_id, cluster, discovered_by=discovered_by)
