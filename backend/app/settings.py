@@ -9,8 +9,12 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+# 已知的不安全預設值，正式環境不得沿用
+_INSECURE_JWT_SECRET = "change_me_in_production"
+_INSECURE_DB_PASSWORD = "changeme_in_production"
 
 # Walk up from this file (backend/app/settings.py) to find the monorepo root .env
 _BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -85,6 +89,23 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return [item.strip() for item in v.split(",") if item.strip()]
         return v
+
+    @model_validator(mode="after")
+    def _guard_production_secrets(self) -> "Settings":
+        """正式環境啟動防呆：拒絕沿用預設密鑰，避免弱密碼上線。"""
+        if self.app_env == "production":
+            insecure: list[str] = []
+            if self.jwt_secret.get_secret_value() == _INSECURE_JWT_SECRET:
+                insecure.append("JWT_SECRET")
+            if _INSECURE_DB_PASSWORD in self.database_url:
+                insecure.append("DATABASE_URL")
+            if insecure:
+                raise ValueError(
+                    "正式環境（APP_ENV=production）偵測到未設定的預設密鑰: "
+                    + ", ".join(insecure)
+                    + "。請在 .env 設定安全值後再啟動。"
+                )
+        return self
 
     @property
     def is_production(self) -> bool:
