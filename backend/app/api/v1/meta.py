@@ -27,12 +27,12 @@ async def health(
     try:
         await db.execute(text("SELECT 1"))
         db_ok = True
-    except Exception:  # noqa: BLE001
+    except Exception:
         db_ok = False
     try:
         pong = await redis.ping()
         redis_ok = bool(pong)
-    except Exception:  # noqa: BLE001
+    except Exception:
         redis_ok = False
 
     return {

@@ -10,7 +10,7 @@ we'd swap RiotRateLimiter for a Redis-backed implementation.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import and_, or_, select
@@ -30,7 +30,7 @@ MIN_RECRAWL_HOURS_NORMAL = 72
 
 async def dispatch_once(redis, batch_size: int = DEFAULT_BATCH_SIZE) -> dict[str, Any]:
     """Pick next puuids and enqueue crawl tasks. Idempotent."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     cutoff_high = now - timedelta(hours=MIN_RECRAWL_HOURS_HIGH_PRIO)
     cutoff_low = now - timedelta(hours=MIN_RECRAWL_HOURS_NORMAL)
 

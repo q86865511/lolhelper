@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 # 95% confidence
 Z_95 = 1.959963984540054

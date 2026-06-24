@@ -68,11 +68,27 @@ ignore = [
     "E501",  # line too long (handled by formatter)
     "S101",  # use of assert (fine in tests)
     "B008",  # function call in default arg (FastAPI Depends pattern)
+    # 中文字串/註解被誤判為 ambiguous-unicode；本專案大量繁中為刻意
+    "RUF001",
+    "RUF002",
+    "RUF003",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S", "B"]
+"tests/**" = ["S", "B", "N"]  # 測試命名（test_x_is_S 等）不套 pep8-naming
 "alembic/**" = ["E", "F", "I"]
+# 統計引擎以 f-string 組裝 SQL，但插入的是內部常數片段，使用者輸入一律走 bound params → S608 為誤報
+"app/api/v1/stats.py" = ["S608"]
+"app/workers/aggregate.py" = ["S608"]
+# settings 的預設值/哨兵常數（change_me_in_production）與 0.0.0.0 綁定為設定預設，非真實密鑰
+"app/settings.py" = ["S105", "S104"]
+# GOOGLE_TOKEN_URL 是公開 OAuth endpoint，變數名含 TOKEN 觸發 S105 → 誤報
+"app/core/google_oauth.py" = ["S105"]
+# Riot 例外子類以 HTTP 語意命名（基底已是 RiotError）；不強制 *Error 後綴
+"app/services/riot/exceptions.py" = ["N818"]
+# 框架的 class 級設定（SQLAlchemy DeclarativeBase / ARQ WorkerSettings），非每實例可變預設
+"app/db/base.py" = ["RUF012"]
+"app/workers/settings.py" = ["RUF012"]
 
 [tool.mypy]
 python_version = "3.12"

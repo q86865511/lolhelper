@@ -7,7 +7,7 @@ champion + augment win rates from low-MMR games are noisy.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -55,7 +55,7 @@ async def seed_platform(platform: str, *, include_master: bool = False) -> int:
     """
     client = get_riot_client()
     cluster = platform_to_cluster(platform)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     leagues = []
     try:
@@ -131,5 +131,5 @@ async def seed_all(include_master: bool = False) -> dict[str, int]:
 
 # --- ARQ task wrapper --------------------------------------------------------
 
-async def seed_high_elo_task(ctx: dict | None = None) -> dict[str, int]:  # noqa: ARG001
+async def seed_high_elo_task(ctx: dict | None = None) -> dict[str, int]:
     return await seed_all(include_master=False)

@@ -11,27 +11,28 @@ Create Date: 2026-05-18
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Sequence, Union
+from datetime import datetime, timezone, UTC
+from typing import Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision: str = "0001_initial"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 # --- Helpers ---------------------------------------------------------------------
 
 def _month_partition_bounds(year: int, month: int) -> tuple[str, str]:
-    start = datetime(year, month, 1, tzinfo=timezone.utc)
+    start = datetime(year, month, 1, tzinfo=UTC)
     if month == 12:
-        end = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        end = datetime(year + 1, 1, 1, tzinfo=UTC)
     else:
-        end = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+        end = datetime(year, month + 1, 1, tzinfo=UTC)
     return start.isoformat(), end.isoformat()
 
 
@@ -40,7 +41,7 @@ def _create_month_partitions(parent: str, months_ahead: int = 3) -> None:
 
     Run again in a worker cron each month so we always have headroom.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     year, month = now.year, now.month
     for offset in range(-1, months_ahead):
         m = month + offset

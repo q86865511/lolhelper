@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from app.settings import Settings, get_settings
+from pydantic import ValidationError
 
 
 def test_settings_loads_with_env(monkeypatch: pytest.MonkeyPatch) -> None:

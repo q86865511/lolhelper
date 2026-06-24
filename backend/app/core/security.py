@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -18,7 +18,7 @@ class TokenError(Exception):
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def create_access_token(user_id: int, settings: Settings) -> tuple[str, datetime]:

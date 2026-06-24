@@ -91,7 +91,7 @@ class Settings(BaseSettings):
         return v
 
     @model_validator(mode="after")
-    def _guard_production_secrets(self) -> "Settings":
+    def _guard_production_secrets(self) -> Settings:
         """正式環境啟動防呆：拒絕沿用預設密鑰，避免弱密碼上線。"""
         if self.app_env == "production":
             insecure: list[str] = []

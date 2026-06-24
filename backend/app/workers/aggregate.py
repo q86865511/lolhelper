@@ -9,7 +9,7 @@ enough. When data grows we can move to incremental aggregation.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import text
 
@@ -100,7 +100,7 @@ async def aggregate_arena_augments(patch: str | None = None) -> int:
         log.info("aggregate.augments.empty")
         return 0
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     insert_sql = text(
         """
         INSERT INTO augment_stats
@@ -163,7 +163,7 @@ def _enrich_stats_rows(rows: list[dict], *, is_global: bool) -> list[dict]:
         by_bucket.setdefault(bucket, []).append(r)
 
     out: list[dict] = []
-    for bucket, bucket_rows in by_bucket.items():
+    for _bucket, bucket_rows in by_bucket.items():
         entries = [(r["augment_id"] if "augment_id" in r else r["item_id"], r["wilson_low"], r["games"]) for r in bucket_rows]
         # min_games already filtered above; assign_tiers uses 0 so all pass
         tiered = assign_tiers(entries, min_games=0)
@@ -213,7 +213,7 @@ async def aggregate_arena_items(patch: str | None = None) -> int:
         return 0
 
     enriched = _enrich_stats_rows([dict(r) for r in rows], is_global=False)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     insert_sql = text(
         """
         INSERT INTO item_stats
@@ -244,7 +244,7 @@ async def aggregate_arena_items(patch: str | None = None) -> int:
 
 # --- ARQ task wrappers ------------------------------------------------------
 
-async def aggregate_arena_task(ctx: dict | None = None) -> dict[str, int]:  # noqa: ARG001
+async def aggregate_arena_task(ctx: dict | None = None) -> dict[str, int]:
     augs = await aggregate_arena_augments(patch=None)
     items = await aggregate_arena_items(patch=None)
     return {"augments": augs, "items": items}

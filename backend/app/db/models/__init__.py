@@ -10,17 +10,17 @@ from app.db.models.summoner import Summoner
 from app.db.models.user import User
 
 __all__ = [
-    "User",
-    "Summoner",
-    "Match",
-    "Participant",
+    "Augment",
     "AugmentStat",
-    "ItemStat",
+    "Champion",
     "CrawlState",
     "IngestAudit",
-    "Augment",
     "Item",
-    "Champion",
+    "ItemStat",
+    "Match",
+    "Participant",
     "Patch",
     "RefreshToken",
+    "Summoner",
+    "User",
 ]
